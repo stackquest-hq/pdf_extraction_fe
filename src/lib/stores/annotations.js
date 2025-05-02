@@ -7,6 +7,9 @@ function createAnnotationsStore() {
     subscribe,
     add: (annotation) => update(annotations => [...annotations, annotation]),
     remove: (id) => update(annotations => annotations.filter(a => a.id !== id)),
+    removeByField: (fieldName, type) => update(annotations => 
+      annotations.filter(a => !(a.fieldName === fieldName && a.type === type))
+    ),
     clear: () => set([])
   };
 }

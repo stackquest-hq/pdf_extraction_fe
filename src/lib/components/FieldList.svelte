@@ -1,12 +1,11 @@
 <script>
-  import { writable } from 'svelte/store';
   import { fieldSelection } from '$lib/stores/fieldSelection';
   import { annotations } from '$lib/stores/annotations';
+  import { fields } from '$lib/stores/fields';
   import Fa from 'svelte-fa';
   import { faPlus, faTrash, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
   import { faEdit, faCopy, faTrashAlt } from '@fortawesome/free-regular-svg-icons';
 
-  const fields = writable([]);
   let newField = '';
   let showActionMenu = false;
   let actionMenuPosition = { x: 0, y: 0 };
@@ -15,7 +14,7 @@
   function addField() {
     if (newField.trim()) {
       const fieldName = newField.trim();
-      fields.update(f => [...f, fieldName]);
+      fields.addRegularField(fieldName);
       newField = '';
       // Automatically select the new field and set annotation type to label
       fieldSelection.setField(fieldName);
@@ -24,18 +23,16 @@
   }
 
   function removeField(field) {
-    // First remove all annotations associated with this field
-    const annotationsToRemove = $annotations.filter(annotation => annotation.fieldName === field);
-    annotationsToRemove.forEach(annotation => {
-      annotations.remove(annotation.id);
-    });
+    // Remove all annotations associated with this field (both label and extract_data)
+    annotations.removeByField(field, 'label');
+    annotations.removeByField(field, 'extract_data');
     
     // Then update the fields list
-    fields.update(f => f.filter(f => f !== field));
+    fields.removeRegularField(field);
     
     // Finally clear selection if this was the selected field
     if ($fieldSelection.selectedField === field) {
-      fieldSelection.clear();
+      fieldSelection.setField('');
     }
   }
 
@@ -89,6 +86,7 @@
       console.log('Copy field:', selectedFieldForAction);
     } else if (action === 'delete') {
       removeField(selectedFieldForAction);
+      selectedFieldForAction = null;
     }
     showActionMenu = false;
   }
@@ -97,7 +95,23 @@
   function handleClickOutside(event) {
     if (!event.target.closest('.action-menu') && !event.target.closest('.action-button')) {
       showActionMenu = false;
+      selectedFieldForAction = null;
     }
+  }
+
+  // Initialize fields from existing annotations
+  $: {
+    const existingFields = $annotations
+      .filter(annotation => annotation.type === 'label')
+      .map(annotation => annotation.fieldName);
+    const uniqueFields = [...new Set(existingFields)];
+    
+    // Only add new fields from annotations
+    uniqueFields.forEach(field => {
+      if (!$fields.regularFields.includes(field)) {
+        fields.addRegularField(field);
+      }
+    });
   }
 </script>
 
@@ -119,7 +133,7 @@
   </div>
 
   <div class="fields">
-    {#each $fields as field}
+    {#each $fields.regularFields as field}
       <div class="field-container">
         <button
           class="field-item"
@@ -138,6 +152,9 @@
         <button class="action-button" on:click={(e) => showActions(e, field)}>
           <Fa icon={faEllipsisV} />
         </button>
+        <button class="delete-button" on:click={() => removeField(field)}>
+          <Fa icon={faTrash} />
+        </button>
       </div>
     {/each}
   </div>
@@ -146,6 +163,7 @@
     <div
       class="action-menu"
       style="left: {actionMenuPosition.x}px; top: {actionMenuPosition.y}px"
+      on:click|stopPropagation
     >
       <button on:click={() => handleActionClick('edit')}>
         <Fa icon={faEdit} />
@@ -231,6 +249,20 @@
     justify-content: center;
   }
 
+  .delete-button {
+    padding: 0.5rem;
+    min-width: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc3545;
+  }
+
+  .delete-button:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+
   .selected {
     background: #007bff;
     color: white;
@@ -250,12 +282,11 @@
   }
 
   .action-menu button {
+    padding: 0.75rem 1rem;
     border: none;
     border-radius: 0;
-    padding: 0.75rem 1rem;
     text-align: left;
     width: 100%;
-    justify-content: flex-start;
   }
 
   .action-menu button:hover {
@@ -263,10 +294,10 @@
   }
 
   .icon-button {
+    padding: 0.5rem;
+    min-width: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem;
-    min-width: 2.5rem;
   }
 </style> 

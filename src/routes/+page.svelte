@@ -33,7 +33,6 @@
     function handleTabChange(tab) {
         activeTab = tab;
         fieldSelection.setMode(tab);
-        fieldSelection.clear();
     }
 </script>
 

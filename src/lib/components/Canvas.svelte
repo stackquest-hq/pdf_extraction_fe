@@ -13,10 +13,11 @@
   let currentRect = { x: 0, y: 0, width: 0, height: 0 };
   let hoveredAnnotation = null;
   let tableMode = false;
+  let cachedImage = null;
 
   // Subscribe to annotations changes
   $: if ($annotations) {
-    drawAnnotations();
+    requestAnimationFrame(drawAnnotations);
   }
 
   onMount(() => {
@@ -26,6 +27,7 @@
       canvas.width = img.width;
       canvas.height = img.height;
       ctx = canvas.getContext('2d');
+      cachedImage = img;
       ctx.drawImage(img, 0, 0);
       drawAnnotations();
     };
@@ -47,29 +49,35 @@
     const y = e.clientY - rect.top;
 
     // Check if mouse is over any annotation
-    hoveredAnnotation = $annotations.find(annotation => 
+    const newHoveredAnnotation = $annotations.find(annotation => 
       isPointInRect(x, y, annotation.coordinates)
     );
 
-    // Redraw to show hover effect
-    drawAnnotations();
+    // Only redraw if hover state changed
+    if (hoveredAnnotation !== newHoveredAnnotation) {
+      hoveredAnnotation = newHoveredAnnotation;
+      requestAnimationFrame(drawAnnotations);
+    }
   }
 
   function handleMouseLeave() {
     if (isDrawing) {
       endDrawing();
     }
-    hoveredAnnotation = null;
-    drawAnnotations();
+    if (hoveredAnnotation !== null) {
+      hoveredAnnotation = null;
+      requestAnimationFrame(drawAnnotations);
+    }
   }
 
   function drawAnnotations() {
-    if (!ctx) return;
+    if (!ctx || !cachedImage) return;
+    
+    // Clear and redraw base image
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const img = new Image();
-    img.src = imageUrl;
-    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(cachedImage, 0, 0);
 
+    // Draw all annotations
     $annotations.forEach(annotation => {
       const isHovered = hoveredAnnotation === annotation;
       const scale = isHovered ? 1.1 : 1;
@@ -121,22 +129,24 @@
     currentRect.width = currentX - startX;
     currentRect.height = currentY - startY;
 
-    drawAnnotations();
-    
-    if ($fieldSelection.annotationType === 'table_header') {
-      ctx.fillStyle = 'rgba(135, 206, 235, 0.2)';
-      ctx.strokeStyle = '#87CEEB';
-    } else if ($fieldSelection.annotationType === 'label') {
-      ctx.fillStyle = 'rgba(240, 230, 140, 0.2)';
-      ctx.strokeStyle = '#F0E68C';
-    } else {
-      ctx.fillStyle = 'rgba(144, 238, 144, 0.2)';
-      ctx.strokeStyle = '#90EE90';
-    }
-    
-    ctx.lineWidth = 2;
-    ctx.fillRect(currentRect.x, currentRect.y, currentRect.width, currentRect.height);
-    ctx.strokeRect(currentRect.x, currentRect.y, currentRect.width, currentRect.height);
+    requestAnimationFrame(() => {
+      drawAnnotations();
+      
+      if ($fieldSelection.annotationType === 'table_header') {
+        ctx.fillStyle = 'rgba(135, 206, 235, 0.2)';
+        ctx.strokeStyle = '#87CEEB';
+      } else if ($fieldSelection.annotationType === 'label') {
+        ctx.fillStyle = 'rgba(240, 230, 140, 0.2)';
+        ctx.strokeStyle = '#F0E68C';
+      } else {
+        ctx.fillStyle = 'rgba(144, 238, 144, 0.2)';
+        ctx.strokeStyle = '#90EE90';
+      }
+      
+      ctx.lineWidth = 2;
+      ctx.fillRect(currentRect.x, currentRect.y, currentRect.width, currentRect.height);
+      ctx.strokeRect(currentRect.x, currentRect.y, currentRect.width, currentRect.height);
+    });
   }
 
   function endDrawing() {
@@ -156,7 +166,6 @@
     };
 
     annotations.add(annotation);
-    drawAnnotations();
   }
 </script>
 
