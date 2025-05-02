@@ -12,6 +12,7 @@
   let startY = 0;
   let currentRect = { x: 0, y: 0, width: 0, height: 0 };
   let hoveredAnnotation = null;
+  let tableMode = false;
 
   // Subscribe to annotations changes
   $: if ($annotations) {
@@ -71,16 +72,18 @@
 
     $annotations.forEach(annotation => {
       const isHovered = hoveredAnnotation === annotation;
-      const scale = isHovered ? 1.1 : 1; // Scale up by 10% when hovered
+      const scale = isHovered ? 1.1 : 1;
       const { x, y, width, height } = annotation.coordinates;
       
-      // Calculate scaled dimensions
       const scaledWidth = width * scale;
       const scaledHeight = height * scale;
       const scaledX = x - (scaledWidth - width) / 2;
       const scaledY = y - (scaledHeight - height) / 2;
 
-      if (annotation.type === 'label') {
+      if (annotation.type === 'table_header') {
+        ctx.fillStyle = 'rgba(135, 206, 235, 0.2)';
+        ctx.strokeStyle = '#87CEEB';
+      } else if (annotation.type === 'label') {
         ctx.fillStyle = 'rgba(240, 230, 140, 0.2)';
         ctx.strokeStyle = '#F0E68C';
       } else {
@@ -88,11 +91,10 @@
         ctx.strokeStyle = '#90EE90';
       }
       
-      ctx.lineWidth = isHovered ? 3 : 2; // Thicker border when hovered
+      ctx.lineWidth = isHovered ? 3 : 2;
       ctx.fillRect(scaledX, scaledY, scaledWidth, scaledHeight);
       ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
 
-      // Add field name label when hovered
       if (isHovered) {
         ctx.fillStyle = '#000';
         ctx.font = '14px Arial';
@@ -120,13 +122,18 @@
     currentRect.height = currentY - startY;
 
     drawAnnotations();
-    if ($fieldSelection.annotationType === 'label') {
+    
+    if ($fieldSelection.annotationType === 'table_header') {
+      ctx.fillStyle = 'rgba(135, 206, 235, 0.2)';
+      ctx.strokeStyle = '#87CEEB';
+    } else if ($fieldSelection.annotationType === 'label') {
       ctx.fillStyle = 'rgba(240, 230, 140, 0.2)';
       ctx.strokeStyle = '#F0E68C';
     } else {
       ctx.fillStyle = 'rgba(144, 238, 144, 0.2)';
       ctx.strokeStyle = '#90EE90';
     }
+    
     ctx.lineWidth = 2;
     ctx.fillRect(currentRect.x, currentRect.y, currentRect.width, currentRect.height);
     ctx.strokeRect(currentRect.x, currentRect.y, currentRect.width, currentRect.height);

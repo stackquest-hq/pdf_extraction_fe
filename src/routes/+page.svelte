@@ -2,10 +2,13 @@
     import { onMount } from 'svelte';
     import Canvas from '$lib/components/Canvas.svelte';
     import FieldList from '$lib/components/FieldList.svelte';
+    import TableExtraction from '$lib/components/TableExtraction.svelte';
     import { annotations } from '$lib/stores/annotations';
+    import { fieldSelection } from '$lib/stores/fieldSelection';
 
     let imageFile = null;
     let imageUrl = null;
+    let activeTab = 'fields'; // 'fields' or 'table'
 
     function handleImageUpload(event) {
         const target = event.target;
@@ -26,6 +29,12 @@
         a.click();
         URL.revokeObjectURL(url);
     }
+
+    function handleTabChange(tab) {
+        activeTab = tab;
+        fieldSelection.setMode(tab);
+        fieldSelection.clear();
+    }
 </script>
 
 <div class="container">
@@ -43,8 +52,29 @@
             {/if}
         </div>
         
-        <div class="field-list-container">
-            <FieldList />
+        <div class="sidebar">
+            <div class="tabs">
+                <button 
+                    class:active={activeTab === 'fields'} 
+                    on:click={() => handleTabChange('fields')}
+                >
+                    Field Extraction
+                </button>
+                <button 
+                    class:active={activeTab === 'table'} 
+                    on:click={() => handleTabChange('table')}
+                >
+                    Table Extraction
+                </button>
+            </div>
+
+            <div class="tab-content">
+                {#if activeTab === 'fields'}
+                    <FieldList />
+                {:else}
+                    <TableExtraction />
+                {/if}
+            </div>
         </div>
     </div>
 </div>
@@ -77,11 +107,37 @@
         overflow: hidden;
     }
 
-    .field-list-container {
+    .sidebar {
         flex: 1;
+        display: flex;
+        flex-direction: column;
         border: 1px solid #ccc;
         border-radius: 4px;
+    }
+
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .tabs button {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .tabs button.active {
+        background-color: #f0f0f0;
+        border-bottom: 2px solid #4CAF50;
+    }
+
+    .tab-content {
+        flex: 1;
         padding: 1rem;
+        overflow-y: auto;
     }
 
     .placeholder {
