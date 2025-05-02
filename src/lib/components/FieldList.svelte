@@ -117,7 +117,7 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-<div class="field-list">
+<div class="field-list" role="region" aria-label="Fields of Interest">
   <h2>Fields of Interest</h2>
   
   <div class="add-field">
@@ -148,6 +148,10 @@
           class="text-box"
           class:selected={$fieldSelection.selectedField === field && $fieldSelection.annotationType === 'extract_data'}
           on:click={() => selectField(field, 'extract_data')}
+          on:keydown={(e) => e.key === 'Enter' && selectField(field, 'extract_data')}
+          role="button"
+          tabindex="0"
+          aria-label={`Select ${field} for data extraction`}
         />
         <button class="action-button" on:click={(e) => showActions(e, field)}>
           <Fa icon={faEllipsisV} />
@@ -164,16 +168,49 @@
       class="action-menu"
       style="left: {actionMenuPosition.x}px; top: {actionMenuPosition.y}px"
       on:click|stopPropagation
+      on:keydown={(e) => {
+        if (e.key === 'Escape') {
+          showActionMenu = false;
+          selectedFieldForAction = null;
+        }
+      }}
+      role="menu"
+      aria-label="Field actions"
+      tabindex="0"
     >
-      <button on:click={() => handleActionClick('edit')}>
+      <button 
+        on:click={() => handleActionClick('edit')} 
+        on:keydown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleActionClick('edit');
+          }
+        }}
+        role="menuitem"
+      >
         <Fa icon={faEdit} />
         Edit
       </button>
-      <button on:click={() => handleActionClick('copy')}>
+      <button 
+        on:click={() => handleActionClick('copy')} 
+        on:keydown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleActionClick('copy');
+          }
+        }}
+        role="menuitem"
+      >
         <Fa icon={faCopy} />
         Copy
       </button>
-      <button on:click={() => handleActionClick('delete')}>
+      <button 
+        on:click={() => handleActionClick('delete')} 
+        on:keydown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleActionClick('delete');
+          }
+        }}
+        role="menuitem"
+      >
         <Fa icon={faTrashAlt} />
         Delete
       </button>

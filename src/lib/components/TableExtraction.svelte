@@ -67,7 +67,7 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-<div class="table-extraction">
+<div class="table-extraction" role="region" aria-label="Table Extraction">
     <div class="field-input">
         <input
             type="text"
@@ -79,26 +79,51 @@
     </div>
 
     <div class="table-container">
-        <div class="table-header">
+        <div class="table-header" role="rowgroup">
             {#each $fields.tableFields as field}
                 <div 
                     class="table-column"
                     class:selected={$fieldSelection.selectedField === field}
                     on:click={() => selectFieldForAnnotation(field)}
+                    on:keydown={(e) => e.key === 'Enter' && selectFieldForAnnotation(field)}
+                    role="columnheader"
+                    tabindex="0"
+                    aria-label={`Select ${field} column`}
                 >
                     <span class="column-name">{field}</span>
-                    <div class="menu-container" on:click|stopPropagation>
+                    <div class="menu-container" on:click|stopPropagation role="presentation">
                         <button 
                             class="menu-trigger"
                             on:click={(e) => toggleMenu(field, e)}
+                            aria-label={`Open menu for ${field} column`}
+                            aria-expanded={activeMenu === field}
+                            aria-controls={`menu-${field}`}
                         >
                             ⋮
                         </button>
                         {#if activeMenu === field}
-                            <div class="menu-popup" on:click|stopPropagation>
+                            <div 
+                                class="menu-popup" 
+                                on:click|stopPropagation
+                                on:keydown={(e) => {
+                                    if (e.key === 'Escape') {
+                                        activeMenu = null;
+                                    }
+                                }}
+                                role="menu"
+                                id={`menu-${field}`}
+                                aria-label={`Actions for ${field} column`}
+                                tabindex="0"
+                            >
                                 <button 
                                     class="menu-item delete"
                                     on:click|stopPropagation={() => removeTableField(field)}
+                                    on:keydown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            removeTableField(field);
+                                        }
+                                    }}
+                                    role="menuitem"
                                 >
                                     Delete Column
                                 </button>
