@@ -26,6 +26,7 @@
 		]
 	},
 	"dependencies": {
+		"@fortawesome/free-regular-svg-icons": "^6.7.2",
 		"@fortawesome/free-solid-svg-icons": "^6.7.2",
 		"konva": "^9.3.20",
 		"svelte-fa": "^4.0.4"
