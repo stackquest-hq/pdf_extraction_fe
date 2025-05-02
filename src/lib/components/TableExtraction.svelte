@@ -26,6 +26,11 @@
     }
   }
 
+  function handleDrawTable() {
+    // TODO: Implement table drawing functionality
+    console.log("Draw table option selected");
+  }
+
   function addTableField() {
     if (newFieldName.trim()) {
       const fieldName = newFieldName.trim();
@@ -93,11 +98,23 @@
     onModeChange={handleExtractionMode} 
   />
 
+  {#if extractionMode === "manual"}
+    <button 
+      class="draw-table-btn slick-btn draw-table-standalone" 
+      on:click={handleDrawTable}
+      aria-label="Draw Table"
+    >
+      Draw Table
+    </button>
+  {/if}
+
   {#if extractionMode !== "auto"}
-    <FieldInput 
-      bind:newFieldName 
-      onAddField={addTableField} 
-    />
+    <div class="manual-controls">
+      <FieldInput 
+        bind:newFieldName 
+        onAddField={addTableField} 
+      />
+    </div>
   {/if}
 
   <div class="table-container">
@@ -114,7 +131,51 @@
   .table-extraction {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
+    background: #fafbfc;
+    border-radius: 8px;
+    padding: 0.5rem 0.5rem 0 0.5rem;
+  }
+
+  .draw-table-standalone {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .manual-controls {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .slick-btn,
+  .draw-table-btn {
+    padding: 0.35rem 0.9rem;
+    background: #f5f7fa;
+    color: #222;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(60,60,60,0.03);
+    transition: background 0.18s, border 0.18s, color 0.18s;
+    height: 2.2rem;
+    min-width: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slick-btn:hover,
+  .draw-table-btn:hover {
+    background: #e6f0fa;
+    border-color: #4a90e2;
+    color: #2563eb;
   }
 
   .table-container {
@@ -122,7 +183,46 @@
     overflow-x: auto;
     background: white;
     border: 1px solid #e0e0e0;
-    min-height: 65vh;
-    border-radius: 4px;
+    min-height: 55vh;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(60,60,60,0.04);
+    margin-top: 0.25rem;
+  }
+
+  /* FieldInput tweaks for compactness */
+  :global(.field-input-container) {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  :global(.field-input-container input) {
+    height: 2.2rem;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    padding: 0 0.75rem;
+    background: #fff;
+    transition: border 0.18s;
+  }
+  :global(.field-input-container input:focus) {
+    border: 1.5px solid #4a90e2;
+    outline: none;
+  }
+  :global(.field-input-container button) {
+    height: 2.2rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.35rem 1.1rem;
+    background: #22c55e;
+    color: #fff;
+    border: none;
+    box-shadow: 0 1px 2px rgba(60,60,60,0.03);
+    transition: background 0.18s;
+  }
+  :global(.field-input-container button:hover) {
+    background: #16a34a;
   }
 </style>
