@@ -175,6 +175,7 @@
     overflow-x: auto;
     background: white;
     border: 1px solid #e0e0e0;
+    min-height: 65vh;
     border-radius: 4px;
   }
 
