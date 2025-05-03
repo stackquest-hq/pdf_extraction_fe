@@ -5,6 +5,8 @@
   import ExtractionModes from "./ExtractionModes.svelte";
   import FieldInput from "./FieldInput.svelte";
   import TableHeader from "./TableHeader.svelte";
+  import Fa from 'svelte-fa';
+  import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
   let newFieldName = "";
   let activeMenu = null;
@@ -21,6 +23,13 @@
         console.log("Heuristic approach selected");
         break;
     }
+  }
+
+  function handleMarkEndOfTable() {
+    // Set both the field name and type for end of table annotation
+    fieldSelection.setField("end_of_table");
+    fieldSelection.setType("end_of_table");
+    console.log("Marking end of table");
   }
 
   function addTableField() {
@@ -92,11 +101,24 @@
 
   {#if extractionMode !== "auto"}
     <div class="manual-controls">
-      <FieldInput 
-        bind:newFieldName 
-        onAddField={addTableField} 
+      <input
+        type="text"
+        bind:value={newFieldName}
+        placeholder="Enter table column name"
+        on:keydown={(e) => e.key === "Enter" && addTableField()}
+        class="compact-input stretch"
       />
+      <button class="icon-btn white-btn" on:click={addTableField} aria-label="Add Column">
+        <Fa icon={faPlus} />
+      </button>
     </div>
+    <button 
+      class="slick-btn mark-end-btn compact" 
+      on:click={handleMarkEndOfTable}
+      aria-label="Mark End Of Table"
+    >
+      Mark End Of Table
+    </button>
   {/if}
 
   <div class="table-container">
@@ -127,6 +149,56 @@
     margin-bottom: 0.25rem;
   }
 
+  .compact-input {
+    height: 2rem;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    padding: 0 0.75rem;
+    background: #fff;
+    transition: border 0.18s;
+  }
+  .compact-input.stretch {
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+  }
+  .compact-input:focus {
+    border: 1.5px solid #4a90e2;
+    outline: none;
+  }
+  .icon-btn {
+    height: 2rem;
+    width: 2.2rem;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: #fff;
+    color: #222;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 1px 2px rgba(60,60,60,0.03);
+    transition: background 0.18s, border 0.18s, color 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .icon-btn.white-btn:hover {
+    background: #ccc;
+    color: #222;
+  }
+
+  .mark-end-btn.compact {
+    margin-top: 0.15rem;
+    margin-bottom: 0.15rem;
+    width: auto;
+    min-width: 0;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.95rem;
+    height: 2rem;
+    border-width: 2px;
+  }
+
   .slick-btn {
     padding: 0.35rem 0.9rem;
     background: #f5f7fa;
@@ -144,7 +216,6 @@
     align-items: center;
     justify-content: center;
   }
-
   .slick-btn:hover {
     background: #e6f0fa;
     border-color: #4a90e2;
