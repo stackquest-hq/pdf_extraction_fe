@@ -18,13 +18,6 @@
   >
     Heuristic Approach
   </button>
-  <button 
-    class="mode-button" 
-    class:active={extractionMode === "manual"}
-    on:click={() => onModeChange("manual")}
-  >
-    Mark Table Manually
-  </button>
 </div>
 
 <style>

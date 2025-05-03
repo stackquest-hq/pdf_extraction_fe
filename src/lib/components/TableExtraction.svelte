@@ -8,7 +8,7 @@
 
   let newFieldName = "";
   let activeMenu = null;
-  let extractionMode = "manual"; // Default to manual mode
+  let extractionMode = "auto"; // Default to auto mode
 
   function handleExtractionMode(mode) {
     extractionMode = mode;
@@ -20,15 +20,7 @@
       case "heuristic":
         console.log("Heuristic approach selected");
         break;
-      case "manual":
-        console.log("Manual marking mode selected");
-        break;
     }
-  }
-
-  function handleDrawTable() {
-    // TODO: Implement table drawing functionality
-    console.log("Draw table option selected");
   }
 
   function addTableField() {
@@ -98,16 +90,6 @@
     onModeChange={handleExtractionMode} 
   />
 
-  {#if extractionMode === "manual"}
-    <button 
-      class="draw-table-btn slick-btn draw-table-standalone" 
-      on:click={handleDrawTable}
-      aria-label="Draw Table"
-    >
-      Draw Table
-    </button>
-  {/if}
-
   {#if extractionMode !== "auto"}
     <div class="manual-controls">
       <FieldInput 
@@ -137,13 +119,6 @@
     padding: 0.5rem 0.5rem 0 0.5rem;
   }
 
-  .draw-table-standalone {
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-    width: 100%;
-    justify-content: flex-start;
-  }
-
   .manual-controls {
     display: flex;
     flex-direction: row;
@@ -152,8 +127,7 @@
     margin-bottom: 0.25rem;
   }
 
-  .slick-btn,
-  .draw-table-btn {
+  .slick-btn {
     padding: 0.35rem 0.9rem;
     background: #f5f7fa;
     color: #222;
@@ -171,8 +145,7 @@
     justify-content: center;
   }
 
-  .slick-btn:hover,
-  .draw-table-btn:hover {
+  .slick-btn:hover {
     background: #e6f0fa;
     border-color: #4a90e2;
     color: #2563eb;
