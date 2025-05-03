@@ -20,7 +20,51 @@
   }
 
   function exportAnnotations() {
-    const data = JSON.stringify($annotations, null, 2);
+    // Transform annotations into the required format
+    const fieldOfInterests = $annotations
+      .filter(annotation => annotation.type === 'label')
+      .map(annotation => ({
+        label: annotation.fieldName,
+        label_name: null,
+        label_rect: {
+          x0: annotation.coordinates.x,
+          y0: annotation.coordinates.y,
+          x1: annotation.coordinates.x + annotation.coordinates.width,
+          y1: annotation.coordinates.y + annotation.coordinates.height
+        }
+      }));
+
+    // Find the single end of table annotation
+    const endOfTableAnnotation = $annotations.find(a => a.type === 'end_of_table');
+
+    const tableAnnotations = {
+      columns_list: $annotations
+        .filter(annotation => annotation.type === 'table_header')
+        .map(annotation => ({
+          column: annotation.fieldName,
+          column_name: null,
+          colummn_rect: {
+            x0: annotation.coordinates.x,
+            y0: annotation.coordinates.y,
+            x1: annotation.coordinates.x + annotation.coordinates.width,
+            y1: annotation.coordinates.y + annotation.coordinates.height
+          }
+        })),
+      end_of_table_name: null,
+      end_of_table_rect: endOfTableAnnotation ? {
+        x0: endOfTableAnnotation.coordinates.x,
+        y0: endOfTableAnnotation.coordinates.y,
+        x1: endOfTableAnnotation.coordinates.x + endOfTableAnnotation.coordinates.width,
+        y1: endOfTableAnnotation.coordinates.y + endOfTableAnnotation.coordinates.height
+      } : null
+    };
+
+    const exportData = {
+      field_of_interests: fieldOfInterests,
+      table_annotations: tableAnnotations
+    };
+
+    const data = JSON.stringify(exportData, null, 2);
     const blob = new Blob([data], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
