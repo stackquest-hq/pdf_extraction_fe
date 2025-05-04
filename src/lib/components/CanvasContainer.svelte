@@ -7,8 +7,8 @@
   export let imageUrl = null;
 
   function handleFileSelected(event) {
-    const { file } = event.detail;
-    imageUrl = URL.createObjectURL(file);
+    const { imageUrl: newImageUrl } = event.detail;
+    imageUrl = "http://localhost:8000/" + newImageUrl;
   }
 
   function handleReupload() {
